@@ -1,0 +1,90 @@
+buildscript {
+	repositories {
+		jcenter()
+		maven { url = "http://files.minecraftforge.net/maven" }
+		maven {
+			name = 'SpongePowered'
+			url = "https://repo.spongepowered.org/maven"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+		classpath 'org.spongepowered:mixingradle:0.5-SNAPSHOT'
+	}
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
+
+version = "0.0.1"
+group = "ru.fewizz.lightbukkit"
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+	sourceCompatibility = targetCompatibility = '1.8'
+}
+
+minecraft {
+	version = "1.12.1-14.22.1.2480"
+	runDir = "run"
+	
+	mappings = "snapshot_20170914"
+}
+
+repositories {
+	maven {
+		name = 'SpongePowered'
+		url = 'https://repo.spongepowered.org/maven'
+	}
+	maven {
+		name = 'spigotmc-public'
+		url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+	}
+	mavenCentral()
+}
+
+configurations {
+	shade
+	compile.extendsFrom shade
+}
+
+dependencies {
+	shade('org.bukkit:bukkit:1.12.1-R0.1-SNAPSHOT'){
+		exclude group: 'com.google.guava'
+		exclude group: 'com.google.code.gson'
+		exclude group: 'junit'
+	}
+	shade('org.spongepowered:mixin:0.7.2-SNAPSHOT'){
+		transitive = false;
+	}
+}
+
+jar {
+	manifest {
+		attributes (
+			'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+			'FMLCorePlugin': 'ru.fewizz.lightbukkit.LightBukkitLoadingPlugin',
+			'TweakOrder': '0',
+			'ForceLoadAsMod': 'true',
+		)
+	}
+	
+	configurations.shade.each { dep ->
+		from(project.zipTree(dep)){
+			exclude 'META-INF', 'META-INF/**'
+		}
+	}
+}
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "mcversion", project.minecraft.version
+
+	from(sourceSets.main.resources.srcDirs) {
+		include 'mcmod.info'
+		expand 'version':project.version, 'mcversion':project.minecraft.version
+	}
+
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'mcmod.info'
+	}
+}
