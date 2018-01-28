@@ -874,4 +874,10 @@ public class LBWorld implements World {
 		
 	}
 
+	@Override
+	public boolean setSpawnLocation(Location location) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

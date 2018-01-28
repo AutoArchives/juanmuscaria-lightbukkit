@@ -28,6 +28,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -51,59 +52,90 @@ import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.SimplePluginManager;
+import org.bukkit.plugin.SimpleServicesManager;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
 
+import net.minecraft.command.CommandHandler;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import ru.fewizz.lightbukkit.LightBukkit;
+import ru.fewizz.lightbukkit.util.MCBukkitCommand;
 
 public class LBServer implements Server {
-	final List<World> worlds = new ArrayList<>(3);
+	final java.util.logging.Logger logger = Logger.getLogger("LBServer");
+	final List<LBWorld> worlds = new ArrayList<>(3);
 	final SimplePluginManager pluginManager;
 	final SimpleCommandMap commandMap;
+	final SimpleServicesManager servicesManager = new SimpleServicesManager();
+	final LBHelpMap helpMap = new LBHelpMap();
+	final StandardMessenger messenger = new StandardMessenger();
 
 	public LBServer() {
-		commandMap = new SimpleCommandMap(this);
+		commandMap = new SimpleCommandMap(this) {
+			@Override
+			public boolean register(String label, String fallbackPrefix, Command command) {
+				boolean registered = super.register(label, fallbackPrefix, command);
+				if(registered)((CommandHandler)LightBukkit.getMCServer().commandManager).registerCommand(new MCBukkitCommand(command));
+				return registered;
+			}
+		};
 		pluginManager = new SimplePluginManager(this, commandMap);
 		MinecraftForge.EVENT_BUS.register(this);
-		Bukkit.setServer(this);
+	}
+	
+	public void onServerStarting() {
+		LightBukkit.LOGGER.info("Loading plugins");
+		loadPlugins();
+		enablePlugins(PluginLoadOrder.STARTUP);
+	}
+	
+	public void onServerStarted() {
+		enablePlugins(PluginLoadOrder.POSTWORLD);
 	}
 	
 	@SubscribeEvent
-	public void onWorldLoad(WorldEvent.Load event) {
+	void onWorldLoad(WorldEvent.Load event) {
 		if(event.getWorld() instanceof WorldServer) {
 			worlds.add(new LBWorld((WorldServer) event.getWorld()));
 		}
 	}
+	
+	@SubscribeEvent
+	void onWorldUnload(WorldEvent.Unload event) {
+		worlds.removeIf(bworld -> bworld.world == event.getWorld());
+	}
 
-	public void loadPlugins() {
+	private void loadPlugins() {
 		// From CB
 		pluginManager.registerInterface(JavaPluginLoader.class);
 
 		File pluginFolder = new File("plugins");
-
-		if (pluginFolder.exists()) {
-			for (Plugin plugin : pluginManager.loadPlugins(pluginFolder)) {
-				try {
-					String message = String.format("Loading %s", plugin.getDescription().getFullName());
-					plugin.getLogger().info(message);
-					plugin.onLoad();
-				} catch (Throwable ex) {
-					Logger.getLogger(LBServer.class.getName()).log(Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
-				}
-			}
-		} else {
+		if(!pluginFolder.exists()) {
 			pluginFolder.mkdir();
+			return;
+		}
+
+
+		for (Plugin plugin : pluginManager.loadPlugins(pluginFolder)) {
+			try {
+				String message = String.format("Loading %s", plugin.getDescription().getFullName());
+				plugin.getLogger().info(message);
+				plugin.onLoad();
+			} catch (Throwable ex) {
+				Logger.getLogger(LBServer.class.getName()).log(Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+			}
 		}
 	}
 
-	public void enablePlugins(PluginLoadOrder type) {
+	private void enablePlugins(PluginLoadOrder type) {
 		// From CB
 		for (Plugin plugin : pluginManager.getPlugins()) {
 			if ((!plugin.isEnabled()) && (plugin.getDescription().getLoad() == type)) {
@@ -145,7 +177,7 @@ public class LBServer implements Server {
 
 	@Override
 	public String getBukkitVersion() {
-		return "0.1";
+		return LightBukkit.BUKKIT_VERSION;
 	}
 
 	@Override
@@ -309,8 +341,7 @@ public class LBServer implements Server {
 
 	@Override
 	public ServicesManager getServicesManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return servicesManager;
 	}
 
 	@Override
@@ -375,8 +406,7 @@ public class LBServer implements Server {
 
 	@Override
 	public Logger getLogger() {
-		// TODO Auto-generated method stub
-		return null;
+		return logger;
 	}
 
 	@Override
@@ -466,7 +496,6 @@ public class LBServer implements Server {
 	@Override
 	public void shutdown() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -543,8 +572,7 @@ public class LBServer implements Server {
 
 	@Override
 	public File getWorldContainer() {
-		// TODO Auto-generated method stub
-		return null;
+		return FMLCommonHandler.instance().getSavesDirectory();
 	}
 
 	@Override
@@ -555,14 +583,12 @@ public class LBServer implements Server {
 
 	@Override
 	public Messenger getMessenger() {
-		// TODO Auto-generated method stub
-		return null;
+		return messenger;
 	}
 
 	@Override
 	public HelpMap getHelpMap() {
-		// TODO Auto-generated method stub
-		return null;
+		return helpMap;
 	}
 
 	@Override

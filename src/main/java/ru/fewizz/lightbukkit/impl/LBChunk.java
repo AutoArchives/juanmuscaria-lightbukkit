@@ -9,27 +9,27 @@ import org.bukkit.entity.Entity;
 import net.minecraft.world.chunk.Chunk;
 
 public class LBChunk implements org.bukkit.Chunk {
-	final Chunk chunk;
-	final org.bukkit.World world;
+	final Chunk mcchunk;
+	final org.bukkit.World bworld;
 	
 	public LBChunk(org.bukkit.World world, Chunk chunk) {
-		this.chunk = chunk;
-		this.world = world;
+		this.mcchunk = chunk;
+		this.bworld = world;
 	}
 
 	@Override
 	public int getX() {
-		return chunk.x;
+		return mcchunk.x;
 	}
 
 	@Override
 	public int getZ() {
-		return chunk.z;
+		return mcchunk.z;
 	}
 
 	@Override
 	public World getWorld() {
-		return world;
+		return bworld;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class LBChunk implements org.bukkit.Chunk {
 
 	@Override
 	public boolean isLoaded() {
-		return chunk.isLoaded();
+		return mcchunk.isLoaded();
 	}
 
 	@Override

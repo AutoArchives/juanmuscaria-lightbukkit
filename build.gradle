@@ -9,7 +9,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-		classpath 'org.spongepowered:mixingradle:0.5-SNAPSHOT'
+		classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
 	}
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -24,10 +24,10 @@ compileJava {
 }
 
 minecraft {
-	version = "1.12.1-14.22.1.2480"
+	version = "1.12.2-14.23.1.2604"
 	runDir = "run"
 	
-	mappings = "snapshot_20170914"
+	mappings = "snapshot_20180127"
 }
 
 repositories {
@@ -48,12 +48,12 @@ configurations {
 }
 
 dependencies {
-	shade('org.bukkit:bukkit:1.12.1-R0.1-SNAPSHOT'){
+	shade('org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'){
 		exclude group: 'com.google.guava'
 		exclude group: 'com.google.code.gson'
 		exclude group: 'junit'
 	}
-	shade('org.spongepowered:mixin:0.7.2-SNAPSHOT'){
+	shade('org.spongepowered:mixin:0.7.6-SNAPSHOT'){
 		transitive = false;
 	}
 }
