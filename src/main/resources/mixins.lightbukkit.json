@@ -5,5 +5,9 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
+    	"entity.player.MixinEntityPlayerMP",
+    	"server.MixinMinecraftServer",
+    	"world.MixinWorldServer",
+    	"world.chunk.MixinChunk"
 	]
 }

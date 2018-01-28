@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.bukkit.*;
 import org.bukkit.BanList.Type;
@@ -13,6 +14,7 @@ import org.bukkit.boss.*;
 import org.bukkit.command.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.generator.ChunkGenerator.ChunkData;
 import org.bukkit.help.HelpMap;
 import org.bukkit.inventory.*;
@@ -25,16 +27,20 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
 
+import com.google.common.collect.Lists;
+
 import net.minecraft.command.CommandHandler;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import ru.fewizz.lightbukkit.LightBukkit;
-import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
+import ru.fewizz.lightbukkit.interfaces.*;
 import ru.fewizz.lightbukkit.util.MCBukkitCommand;
 
 public class LBServer implements Server {
 	final java.util.logging.Logger logger = Logger.getLogger("LBServer");
 	final List<LBWorld> worlds = new ArrayList<>(3);
+	final Map<UUID, LBPlayer> players = new HashMap<>();
 	final SimplePluginManager pluginManager;
 	final SimpleCommandMap commandMap;
 	final SimpleServicesManager servicesManager = new SimpleServicesManager();
@@ -42,18 +48,9 @@ public class LBServer implements Server {
 	final StandardMessenger messenger = new StandardMessenger();
 
 	public LBServer() {
-		commandMap = new SimpleCommandMap(this) {
-			@Override
-			public boolean register(String label, String fallbackPrefix, Command command) {
-				boolean registered = super.register(label, fallbackPrefix, command);
-				
-				if(registered)
-					((CommandHandler)LightBukkit.getMCServer().commandManager).registerCommand(new MCBukkitCommand(command));
-				
-				return registered;
-			}
-		};
+		commandMap = new SimpleCommandMap(this);
 		pluginManager = new SimplePluginManager(this, commandMap);
+		pluginManager.registerInterface(JavaPluginLoader.class);
 		LightBukkit.LOGGER.info("Loading plugins");
 		loadPlugins();
 	}
@@ -64,12 +61,21 @@ public class LBServer implements Server {
 	
 	public void onServerStarted() {
 		enablePlugins(PluginLoadOrder.POSTWORLD);
+		commandMap.getCommands().forEach(com -> {
+			((CommandHandler)LightBukkit.getMCServer().commandManager).registerCommand(new MCBukkitCommand(com));
+		});
+	}
+	
+	public void onEntityPlayerMPCreated(EntityPlayerMP player) {
+		LBPlayer lbPlayer = players.computeIfAbsent(player.getPersistentID(), uuid -> new LBPlayer(player));
+		((IPlayer)player).setLBPlayer(lbPlayer);
 	}
 	
 	public void onWorldLoad(WorldServer w) {
 		LBWorld lbw = new LBWorld(w);
 		((ILBWorldProvider)w).setLBWorld(lbw);
 		worlds.add(lbw);
+		pluginManager.callEvent(new WorldInitEvent(lbw));
 	}
 	
 	public void onWorldUnload(WorldServer w) {
@@ -79,7 +85,6 @@ public class LBServer implements Server {
 
 	private void loadPlugins() {
 		// From CB
-		pluginManager.registerInterface(JavaPluginLoader.class);
 
 		File pluginFolder = new File("plugins");
 		if(!pluginFolder.exists()) {
@@ -113,7 +118,6 @@ public class LBServer implements Server {
 	                }
 	            }
 	            pluginManager.dirtyPermissibles();
-	            
 				pluginManager.enablePlugin(plugin);
 			}
 		}
@@ -145,26 +149,22 @@ public class LBServer implements Server {
 	}
 
 	@Override
-	public Collection<? extends Player> getOnlinePlayers() {
-		// TODO Auto-generated method stub
-		return null;
+	public Collection<LBPlayer> getOnlinePlayers() {
+		return Collections.unmodifiableCollection(players.values());
 	}
 
 	@Override
 	public int getMaxPlayers() {
-		// TODO Auto-generated method stub
-		return 0;
+		return LightBukkit.getMCServer().getMaxPlayers();
 	}
 
 	@Override
 	public int getPort() {
-		// TODO Auto-generated method stub
-		return 0;
+		return LightBukkit.getMCServer().getServerPort();
 	}
 
 	@Override
 	public int getViewDistance() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -176,7 +176,6 @@ public class LBServer implements Server {
 
 	@Override
 	public String getServerName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -270,14 +269,12 @@ public class LBServer implements Server {
 
 	@Override
 	public Player getPlayer(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return ((IPlayer)LightBukkit.getMCServer().getPlayerList().getPlayerByUsername(name)).getLBPlayer();
 	}
 
 	@Override
 	public Player getPlayerExact(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return getPlayer(name);
 	}
 
 	@Override
@@ -288,8 +285,7 @@ public class LBServer implements Server {
 
 	@Override
 	public Player getPlayer(UUID id) {
-		// TODO Auto-generated method stub
-		return null;
+		return players.get(id);
 	}
 
 	@Override
@@ -310,8 +306,7 @@ public class LBServer implements Server {
 
 	@Override
 	public List<World> getWorlds() {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.unmodifiableList(worlds);
 	}
 
 	@Override
@@ -375,7 +370,9 @@ public class LBServer implements Server {
 
 	@Override
 	public PluginCommand getPluginCommand(String name) {
-		// TODO Auto-generated method stub
+		Command c = commandMap.getCommand(name);
+		if(c instanceof PluginCommand)
+			return (PluginCommand) c;
 		return null;
 	}
 
@@ -387,8 +384,7 @@ public class LBServer implements Server {
 
 	@Override
 	public boolean dispatchCommand(CommandSender sender, String commandLine) throws CommandException {
-		// TODO Auto-generated method stub
-		return false;
+		return commandMap.dispatch(sender, commandLine);
 	}
 
 	@Override

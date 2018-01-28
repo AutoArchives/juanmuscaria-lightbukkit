@@ -22,9 +22,15 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.text.*;
+import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
 
 public class LBPlayer implements Player {
 	EntityPlayerMP mcPlayer;
+	
+	public LBPlayer(EntityPlayerMP player) {
+		mcPlayer = player;
+	}
 	
 	@Override
 	public String getName() {
@@ -495,8 +501,7 @@ public class LBPlayer implements Player {
 
 	@Override
 	public World getWorld() {
-		// TODO Auto-generated method stub
-		return null;
+		return ((ILBWorldProvider)mcPlayer.getServerWorld()).getLBWorld();
 	}
 
 	@Override
@@ -645,8 +650,7 @@ public class LBPlayer implements Player {
 
 	@Override
 	public UUID getUniqueId() {
-		// TODO Auto-generated method stub
-		return null;
+		return mcPlayer.getUniqueID();
 	}
 
 	@Override
@@ -813,14 +817,13 @@ public class LBPlayer implements Player {
 
 	@Override
 	public void sendMessage(String message) {
-		// TODO Auto-generated method stub
-		
+		mcPlayer.sendMessage(new TextComponentString(message));
 	}
 
 	@Override
 	public void sendMessage(String[] messages) {
-		// TODO Auto-generated method stub
-		
+		for(String s : messages)
+			sendMessage(s);
 	}
 
 	@Override
@@ -1023,8 +1026,7 @@ public class LBPlayer implements Player {
 
 	@Override
 	public Player getPlayer() {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	@Override

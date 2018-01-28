@@ -70,6 +70,10 @@ public class LBWorld implements World {
 	public Block getBlockAt(Location location) {
 		return getBlockAt(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 	}
+	
+	public Block getBlockAt(BlockPos pos) {
+		return getBlockAt(pos.getX(), pos.getY(), pos.getZ());
+	}
 
 	@Override
 	public int getBlockTypeIdAt(int x, int y, int z) {
@@ -102,7 +106,7 @@ public class LBWorld implements World {
 	}
 
 	@Override
-	public Chunk getChunkAt(int x, int z) {
+	public LBChunk getChunkAt(int x, int z) {
 		return ((IChunk)mcWorld.getChunkFromChunkCoords(x, z)).getLBChunk();
 	}
 

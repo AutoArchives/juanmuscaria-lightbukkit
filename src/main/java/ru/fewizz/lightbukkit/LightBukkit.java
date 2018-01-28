@@ -21,7 +21,8 @@ public class LightBukkit {
 	
 	@Instance
 	static LightBukkit instance;
-	static LBServer server;
+	public static LBServer server;
+	static MinecraftServer mcServer;
 
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event) {
@@ -38,6 +39,7 @@ public class LightBukkit {
 	
 	@EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
+		mcServer = event.getServer();
 		server.onServerStarting();
 	}
 	
@@ -47,6 +49,6 @@ public class LightBukkit {
 	}
 	
 	public static MinecraftServer getMCServer() {
-		return FMLCommonHandler.instance().getMinecraftServerInstance();
+		return mcServer;
 	}
 }

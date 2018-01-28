@@ -1,4 +1,4 @@
-package ru.fewizz.lightbukkit.mixin.server;
+package ru.fewizz.lightbukkit.mixin.world.chunk;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -12,7 +12,7 @@ import ru.fewizz.lightbukkit.interfaces.IChunk;
 public abstract class MixinChunk implements IChunk {
 	LBChunk lbChunk;
 	
-	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/World;II)V")
+	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/World;II)V")
 	void onInit(CallbackInfo ci) {
 		lbChunk = new LBChunk((net.minecraft.world.chunk.Chunk) (Object)this);
 	}

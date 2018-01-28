@@ -5,15 +5,13 @@ import org.bukkit.block.*;
 import org.bukkit.entity.Entity;
 
 import net.minecraft.world.chunk.Chunk;
-import ru.fewizz.lightbukkit.interfaces.IChunk;
+import ru.fewizz.lightbukkit.interfaces.*;
 
 public class LBChunk implements org.bukkit.Chunk {
 	final Chunk mcChunk;
-	final IChunk icmChunk;
 	
 	public LBChunk(Chunk chunk) {
 		this.mcChunk = chunk;
-		this.icmChunk = (IChunk) chunk;
 	}
 
 	@Override
@@ -28,13 +26,12 @@ public class LBChunk implements org.bukkit.Chunk {
 
 	@Override
 	public LBWorld getWorld() {
-		return icmChunk.getLBWorld();
+		return ((ILBWorldProvider)mcChunk.getWorld()).getLBWorld();
 	}
 
 	@Override
 	public Block getBlock(int x, int y, int z) {
-		// TODO Auto-generated method stub
-		return null;
+		return new LBBLock(x, y, z, getWorld());
 	}
 
 	@Override

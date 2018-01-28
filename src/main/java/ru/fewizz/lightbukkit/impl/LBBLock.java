@@ -16,6 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
+import ru.fewizz.lightbukkit.LightBukkit;
+import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
+
 public class LBBLock implements Block {
 	final int x;
 	final int y;
@@ -84,16 +87,16 @@ public class LBBLock implements Block {
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Material getType() {
-		// TODO Auto-generated method stub
-		return null;
+		return Material.getMaterial(getTypeId());
 	}
 
 	@Override
 	public int getTypeId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return net.minecraft.block.Block.getIdFromBlock(
+				LightBukkit.getMCServer().getWorld(dim).getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).getBlock());
 	}
 
 	@Override
@@ -116,8 +119,7 @@ public class LBBLock implements Block {
 
 	@Override
 	public World getWorld() {
-		// TODO Auto-generated method stub
-		return null;
+		return ((ILBWorldProvider)LightBukkit.getMCServer().getWorld(dim)).getLBWorld();
 	}
 
 	@Override
@@ -149,8 +151,7 @@ public class LBBLock implements Block {
 
 	@Override
 	public Chunk getChunk() {
-		// TODO Auto-generated method stub
-		return null;
+		return getWorld().getChunkAt(x >> 4, z >> 4);
 	}
 
 	@Override

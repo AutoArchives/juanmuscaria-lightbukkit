@@ -1,11 +1,11 @@
 package ru.fewizz.lightbukkit.util;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandExecuteAt;
-import net.minecraft.command.ICommandSender;
+import org.bukkit.command.*;
+
+import net.minecraft.command.*;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import org.bukkit.command.Command;
+import ru.fewizz.lightbukkit.interfaces.IPlayer;
 
 public class MCBukkitCommand extends CommandBase {
 	Command bCommand;
@@ -25,8 +25,12 @@ public class MCBukkitCommand extends CommandBase {
 	}
 
 	@Override
-	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		bCommand.execute(null, getName(), args);
+	public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
+		CommandSender cs = null;
+		if(sender instanceof EntityPlayerMP)
+			cs = ((IPlayer)sender).getLBPlayer();
+		
+		bCommand.execute(cs, getName(), args);
 	}
 
 }
