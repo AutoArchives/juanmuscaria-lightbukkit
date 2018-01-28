@@ -1,35 +1,34 @@
 package ru.fewizz.lightbukkit.impl;
 
 import org.bukkit.ChunkSnapshot;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.*;
 import org.bukkit.entity.Entity;
 
 import net.minecraft.world.chunk.Chunk;
+import ru.fewizz.lightbukkit.interfaces.IChunk;
 
 public class LBChunk implements org.bukkit.Chunk {
-	final Chunk mcchunk;
-	final org.bukkit.World bworld;
+	final Chunk mcChunk;
+	final IChunk icmChunk;
 	
-	public LBChunk(org.bukkit.World world, Chunk chunk) {
-		this.mcchunk = chunk;
-		this.bworld = world;
+	public LBChunk(Chunk chunk) {
+		this.mcChunk = chunk;
+		this.icmChunk = (IChunk) chunk;
 	}
 
 	@Override
 	public int getX() {
-		return mcchunk.x;
+		return mcChunk.x;
 	}
 
 	@Override
 	public int getZ() {
-		return mcchunk.z;
+		return mcChunk.z;
 	}
 
 	@Override
-	public World getWorld() {
-		return bworld;
+	public LBWorld getWorld() {
+		return icmChunk.getLBWorld();
 	}
 
 	@Override
@@ -65,7 +64,7 @@ public class LBChunk implements org.bukkit.Chunk {
 
 	@Override
 	public boolean isLoaded() {
-		return mcchunk.isLoaded();
+		return mcChunk.isLoaded();
 	}
 
 	@Override

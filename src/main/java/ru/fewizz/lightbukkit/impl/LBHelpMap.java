@@ -1,14 +1,8 @@
 package ru.fewizz.lightbukkit.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.bukkit.help.HelpMap;
-import org.bukkit.help.HelpTopic;
-import org.bukkit.help.HelpTopicFactory;
+import org.bukkit.help.*;
 
 public class LBHelpMap implements HelpMap {
 	Map<String, HelpTopic> topics = new HashMap<>();
@@ -41,7 +35,7 @@ public class LBHelpMap implements HelpMap {
 
 	@Override
 	public List<String> getIgnoredPlugins() {
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 }

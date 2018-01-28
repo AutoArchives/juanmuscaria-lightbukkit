@@ -2,71 +2,34 @@ package ru.fewizz.lightbukkit.impl;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
+import java.util.*;
 import java.util.logging.Logger;
 
-import org.bukkit.BanList;
+import org.bukkit.*;
 import org.bukkit.BanList.Type;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
-import org.bukkit.UnsafeValues;
 import org.bukkit.Warning.WarningState;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.advancement.Advancement;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarFlag;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandException;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.boss.*;
+import org.bukkit.command.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.generator.ChunkGenerator.ChunkData;
 import org.bukkit.help.HelpMap;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFactory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Merchant;
-import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.*;
 import org.bukkit.map.MapView;
 import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginLoadOrder;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.ServicesManager;
-import org.bukkit.plugin.SimplePluginManager;
-import org.bukkit.plugin.SimpleServicesManager;
+import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import org.bukkit.plugin.messaging.Messenger;
-import org.bukkit.plugin.messaging.StandardMessenger;
+import org.bukkit.plugin.messaging.*;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
 
 import net.minecraft.command.CommandHandler;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import ru.fewizz.lightbukkit.LightBukkit;
+import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
 import ru.fewizz.lightbukkit.util.MCBukkitCommand;
 
 public class LBServer implements Server {
@@ -83,17 +46,19 @@ public class LBServer implements Server {
 			@Override
 			public boolean register(String label, String fallbackPrefix, Command command) {
 				boolean registered = super.register(label, fallbackPrefix, command);
-				if(registered)((CommandHandler)LightBukkit.getMCServer().commandManager).registerCommand(new MCBukkitCommand(command));
+				
+				if(registered)
+					((CommandHandler)LightBukkit.getMCServer().commandManager).registerCommand(new MCBukkitCommand(command));
+				
 				return registered;
 			}
 		};
 		pluginManager = new SimplePluginManager(this, commandMap);
-		MinecraftForge.EVENT_BUS.register(this);
+		LightBukkit.LOGGER.info("Loading plugins");
+		loadPlugins();
 	}
 	
 	public void onServerStarting() {
-		LightBukkit.LOGGER.info("Loading plugins");
-		loadPlugins();
 		enablePlugins(PluginLoadOrder.STARTUP);
 	}
 	
@@ -101,16 +66,15 @@ public class LBServer implements Server {
 		enablePlugins(PluginLoadOrder.POSTWORLD);
 	}
 	
-	@SubscribeEvent
-	void onWorldLoad(WorldEvent.Load event) {
-		if(event.getWorld() instanceof WorldServer) {
-			worlds.add(new LBWorld((WorldServer) event.getWorld()));
-		}
+	public void onWorldLoad(WorldServer w) {
+		LBWorld lbw = new LBWorld(w);
+		((ILBWorldProvider)w).setLBWorld(lbw);
+		worlds.add(lbw);
 	}
 	
-	@SubscribeEvent
-	void onWorldUnload(WorldEvent.Unload event) {
-		worlds.removeIf(bworld -> bworld.world == event.getWorld());
+	public void onWorldUnload(WorldServer w) {
+		((ILBWorldProvider)w).setLBWorld(null);
+		worlds.removeIf(bworld -> bworld.mcWorld == w);
 	}
 
 	private void loadPlugins() {
@@ -130,12 +94,12 @@ public class LBServer implements Server {
 				plugin.getLogger().info(message);
 				plugin.onLoad();
 			} catch (Throwable ex) {
-				Logger.getLogger(LBServer.class.getName()).log(Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+				LightBukkit.LOGGER.warn(ex.getMessage() + " initializing " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
 			}
 		}
 	}
 
-	private void enablePlugins(PluginLoadOrder type) {
+	public void enablePlugins(PluginLoadOrder type) {
 		// From CB
 		for (Plugin plugin : pluginManager.getPlugins()) {
 			if ((!plugin.isEnabled()) && (plugin.getDescription().getLoad() == type)) {
@@ -145,7 +109,7 @@ public class LBServer implements Server {
 	                try {
 	                    pluginManager.addPermission(perm, false);
 	                } catch (IllegalArgumentException ex) {
-	                    getLogger().log(Level.WARNING, "Plugin " + plugin.getDescription().getFullName() + " tried to register permission '" + perm.getName() + "' but it's already registered", ex);
+	                	LightBukkit.LOGGER.warn("Plugin " + plugin.getDescription().getFullName() + " tried to register permission '" + perm.getName() + "' but it's already registered", ex);
 	                }
 	            }
 	            pluginManager.dirtyPermissibles();
@@ -167,12 +131,12 @@ public class LBServer implements Server {
 
 	@Override
 	public String getName() {
-		return "LightBukkit";
+		return LightBukkit.NAME;
 	}
 
 	@Override
 	public String getVersion() {
-		return "0";
+		return LightBukkit.VERSION;
 	}
 
 	@Override

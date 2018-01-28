@@ -17,6 +17,24 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
 public class LBBLock implements Block {
+	final int x;
+	final int y;
+	final int z;
+	final int dim;
+
+	public LBBLock(int x, int y, int z, LBWorld w) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.dim = w.mcWorld.provider.getDimension();
+	}
+	
+	public LBBLock(int x, int y, int z, int dim) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.dim = dim;
+	}
 
 	@Override
 	public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
@@ -104,20 +122,17 @@ public class LBBLock implements Block {
 
 	@Override
 	public int getX() {
-		// TODO Auto-generated method stub
-		return 0;
+		return x;
 	}
 
 	@Override
 	public int getY() {
-		// TODO Auto-generated method stub
-		return 0;
+		return y;
 	}
 
 	@Override
 	public int getZ() {
-		// TODO Auto-generated method stub
-		return 0;
+		return z;
 	}
 
 	@Override

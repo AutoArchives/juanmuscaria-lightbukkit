@@ -1,37 +1,12 @@
 package ru.fewizz.lightbukkit.impl;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import org.bukkit.BlockChangeDelegate;
-import org.bukkit.Chunk;
-import org.bukkit.ChunkSnapshot;
-import org.bukkit.Difficulty;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
-import org.bukkit.TreeType;
-import org.bukkit.World;
-import org.bukkit.WorldBorder;
-import org.bukkit.WorldType;
-import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LightningStrike;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.generator.BlockPopulator;
-import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.*;
+import org.bukkit.block.*;
+import org.bukkit.entity.*;
+import org.bukkit.generator.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.MetadataValue;
@@ -41,12 +16,13 @@ import org.bukkit.util.Vector;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import ru.fewizz.lightbukkit.interfaces.IChunk;
 
 public class LBWorld implements World {
-	WorldServer world;
+	WorldServer mcWorld;
 	
 	public LBWorld(WorldServer world) {
-		this.world = world;
+		this.mcWorld = world;
 	}
 
 	@Override
@@ -97,7 +73,7 @@ public class LBWorld implements World {
 
 	@Override
 	public int getBlockTypeIdAt(int x, int y, int z) {
-		return net.minecraft.block.Block.getIdFromBlock(world.getBlockState(new BlockPos(x, y, z)).getBlock());
+		return net.minecraft.block.Block.getIdFromBlock(mcWorld.getBlockState(new BlockPos(x, y, z)).getBlock());
 	}
 
 	@Override
@@ -107,7 +83,7 @@ public class LBWorld implements World {
 
 	@Override
 	public int getHighestBlockYAt(int x, int z) {
-		return world.getChunkFromChunkCoords(x >> 4, z >> 4).getHeightValue(x & 0xF, z & 0xF);
+		return mcWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getHeightValue(x & 0xF, z & 0xF);
 	}
 
 	@Override
@@ -127,20 +103,17 @@ public class LBWorld implements World {
 
 	@Override
 	public Chunk getChunkAt(int x, int z) {
-		// TODO Auto-generated method stub
-		return null;
+		return ((IChunk)mcWorld.getChunkFromChunkCoords(x, z)).getLBChunk();
 	}
 
 	@Override
 	public Chunk getChunkAt(Location location) {
-		// TODO Auto-generated method stub
-		return null;
+		return getChunkAt(location.getBlockX() >> 4, location.getBlockZ() >> 4);
 	}
 
 	@Override
 	public Chunk getChunkAt(Block block) {
-		// TODO Auto-generated method stub
-		return null;
+		return getChunkAt(block.getX() >> 4, block.getZ() >> 4);
 	}
 
 	@Override
@@ -156,7 +129,6 @@ public class LBWorld implements World {
 
 	@Override
 	public void loadChunk(Chunk chunk) {
-		// TODO Auto-generated method stub
 		
 	}
 
