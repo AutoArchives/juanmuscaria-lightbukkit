@@ -1,2 +1,2 @@
-FMLCorePlugin: ru.fewizz.lightbukkit.LightBukkitLoadingPlugin
+FMLCorePlugin: ru.fewizz.lightbukkit.core.LightBukkitLoadingPlugin
 FMLCorePluginContainsFMLMod: true

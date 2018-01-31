@@ -1,6 +1,6 @@
 package ru.fewizz.lightbukkit.interfaces;
 
-import ru.fewizz.lightbukkit.impl.LBPlayer;
+import ru.fewizz.lightbukkit.core.LBPlayer;
 
 public interface IPlayer {
 	public LBPlayer getLBPlayer();

@@ -1,4 +1,4 @@
-package ru.fewizz.lightbukkit.impl;
+package ru.fewizz.lightbukkit.core;
 
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.*;

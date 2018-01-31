@@ -1,4 +1,4 @@
-package ru.fewizz.lightbukkit;
+package ru.fewizz.lightbukkit.core;
 
 import java.util.Map;
 

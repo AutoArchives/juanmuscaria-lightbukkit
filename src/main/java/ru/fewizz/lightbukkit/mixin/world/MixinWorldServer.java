@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.world.*;
-import ru.fewizz.lightbukkit.impl.LBWorld;
+import ru.fewizz.lightbukkit.core.LBWorld;
 import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
 
 @Mixin(WorldServer.class)

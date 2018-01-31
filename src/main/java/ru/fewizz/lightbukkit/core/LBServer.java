@@ -1,14 +1,16 @@
-package ru.fewizz.lightbukkit.impl;
+package ru.fewizz.lightbukkit.core;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.bukkit.*;
 import org.bukkit.BanList.Type;
 import org.bukkit.Warning.WarningState;
+import org.bukkit.World;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.boss.*;
 import org.bukkit.command.*;
@@ -19,6 +21,7 @@ import org.bukkit.generator.ChunkGenerator.ChunkData;
 import org.bukkit.help.HelpMap;
 import org.bukkit.inventory.*;
 import org.bukkit.map.MapView;
+import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.JavaPluginLoader;
@@ -27,18 +30,16 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
 
-import com.google.common.collect.Lists;
-
 import net.minecraft.command.CommandHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldServer;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.*;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import ru.fewizz.lightbukkit.LightBukkit;
+import ru.fewizz.lightbukkit.core.util.MCBukkitCommand;
 import ru.fewizz.lightbukkit.interfaces.*;
-import ru.fewizz.lightbukkit.util.MCBukkitCommand;
 
 public class LBServer implements Server {
-	final java.util.logging.Logger logger = Logger.getLogger("LBServer");
+	final java.util.logging.Logger JLOGGER = Logger.getLogger("LightBukkitServer");
 	final List<LBWorld> worlds = new ArrayList<>(3);
 	final Map<UUID, LBPlayer> players = new HashMap<>();
 	final SimplePluginManager pluginManager;
@@ -46,20 +47,27 @@ public class LBServer implements Server {
 	final SimpleServicesManager servicesManager = new SimpleServicesManager();
 	final LBHelpMap helpMap = new LBHelpMap();
 	final StandardMessenger messenger = new StandardMessenger();
+	public final MetadataStoreBase<Entity> entityMetaStore;
 
-	public LBServer() {
+	LBServer() {
 		commandMap = new SimpleCommandMap(this);
 		pluginManager = new SimplePluginManager(this, commandMap);
 		pluginManager.registerInterface(JavaPluginLoader.class);
+		entityMetaStore = new MetadataStoreBase<Entity>() {
+			@Override
+			protected String disambiguate(Entity subject, String metadataKey) {
+				return subject.getUniqueId().toString() + ":" + metadataKey;
+			}
+		};
 		LightBukkit.LOGGER.info("Loading plugins");
 		loadPlugins();
 	}
 	
-	public void onServerStarting() {
+	void onServerStarting() {
 		enablePlugins(PluginLoadOrder.STARTUP);
 	}
 	
-	public void onServerStarted() {
+	void onServerStarted() {
 		enablePlugins(PluginLoadOrder.POSTWORLD);
 		commandMap.getCommands().forEach(com -> {
 			((CommandHandler)LightBukkit.getMCServer().commandManager).registerCommand(new MCBukkitCommand(com));
@@ -71,21 +79,20 @@ public class LBServer implements Server {
 		((IPlayer)player).setLBPlayer(lbPlayer);
 	}
 	
-	public void onWorldLoad(WorldServer w) {
+	void onWorldLoad(WorldServer w) {
 		LBWorld lbw = new LBWorld(w);
 		((ILBWorldProvider)w).setLBWorld(lbw);
 		worlds.add(lbw);
 		pluginManager.callEvent(new WorldInitEvent(lbw));
 	}
 	
-	public void onWorldUnload(WorldServer w) {
+	void onWorldUnload(WorldServer w) {
 		((ILBWorldProvider)w).setLBWorld(null);
 		worlds.removeIf(bworld -> bworld.mcWorld == w);
 	}
 
 	private void loadPlugins() {
 		// From CB
-
 		File pluginFolder = new File("plugins");
 		if(!pluginFolder.exists()) {
 			pluginFolder.mkdir();
@@ -104,7 +111,7 @@ public class LBServer implements Server {
 		}
 	}
 
-	public void enablePlugins(PluginLoadOrder type) {
+	void enablePlugins(PluginLoadOrder type) {
 		// From CB
 		for (Plugin plugin : pluginManager.getPlugins()) {
 			if ((!plugin.isEnabled()) && (plugin.getDescription().getLoad() == type)) {
@@ -230,13 +237,12 @@ public class LBServer implements Server {
 	@Override
 	public void reloadWhitelist() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public int broadcastMessage(String message) {
-		// TODO Auto-generated method stub
-		return 0;
+		LightBukkit.mcServer.sendMessage(new TextComponentString(message));
+		return 1;
 	}
 
 	@Override
@@ -279,8 +285,7 @@ public class LBServer implements Server {
 
 	@Override
 	public List<Player> matchPlayer(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return players.values().stream().filter(p -> p.getName().equals(name)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -365,7 +370,7 @@ public class LBServer implements Server {
 
 	@Override
 	public Logger getLogger() {
-		return logger;
+		return JLOGGER;
 	}
 
 	@Override
@@ -378,8 +383,7 @@ public class LBServer implements Server {
 
 	@Override
 	public void savePlayers() {
-		// TODO Auto-generated method stub
-
+		LightBukkit.getMCServer().getPlayerList().saveAllPlayerData();
 	}
 
 	@Override
@@ -425,8 +429,7 @@ public class LBServer implements Server {
 
 	@Override
 	public int getSpawnRadius() {
-		// TODO Auto-generated method stub
-		return 0;
+		return LightBukkit.mcServer.getSpawnProtectionSize();
 	}
 
 	@Override
@@ -455,13 +458,21 @@ public class LBServer implements Server {
 
 	@Override
 	public void shutdown() {
-		// TODO Auto-generated method stub
+		FMLCommonHandler.instance().handleExit(1);
 	}
 
 	@Override
 	public int broadcast(String message, String permission) {
-		// TODO Auto-generated method stub
-		return 0;
+		AtomicInteger c = new AtomicInteger();
+		
+		players.forEach((uuid, pl) -> {
+			if(pl.hasPermission(permission)) {
+				pl.sendMessage(message);
+				c.incrementAndGet();
+			}
+		});
+		
+		return c.get();
 	}
 
 	@Override
@@ -484,8 +495,6 @@ public class LBServer implements Server {
 
 	@Override
 	public void banIP(String address) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -512,16 +521,15 @@ public class LBServer implements Server {
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public GameMode getDefaultGameMode() {
-		// TODO Auto-generated method stub
-		return null;
+		return GameMode.getByValue(LightBukkit.getMCServer().getGameType().getID());
 	}
 
 	@Override
 	public void setDefaultGameMode(GameMode mode) {
-		// TODO Auto-generated method stub
-
+		LightBukkit.getMCServer().setGameType(GameType.getByID(mode.getValue()));
 	}
 
 	@Override
@@ -612,8 +620,7 @@ public class LBServer implements Server {
 
 	@Override
 	public String getMotd() {
-		// TODO Auto-generated method stub
-		return null;
+		return LightBukkit.mcServer.getMOTD();
 	}
 
 	@Override
@@ -684,8 +691,7 @@ public class LBServer implements Server {
 
 	@Override
 	public Entity getEntity(UUID uuid) {
-		// TODO Auto-generated method stub
-		return null;
+		return ((IEntity)LightBukkit.mcServer.getEntityFromUuid(uuid)).getLBEntity();
 	}
 
 	@Override

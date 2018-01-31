@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.world.chunk.Chunk;
-import ru.fewizz.lightbukkit.impl.*;
+import ru.fewizz.lightbukkit.core.*;
 import ru.fewizz.lightbukkit.interfaces.IChunk;
 
 @Mixin(Chunk.class)

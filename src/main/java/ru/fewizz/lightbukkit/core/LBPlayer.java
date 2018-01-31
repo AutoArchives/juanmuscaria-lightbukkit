@@ -1,56 +1,62 @@
-package ru.fewizz.lightbukkit.impl;
+package ru.fewizz.lightbukkit.core;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 
 import org.bukkit.*;
 import org.bukkit.advancement.*;
-import org.bukkit.attribute.*;
-import org.bukkit.block.*;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.InventoryView.Property;
 import org.bukkit.map.MapView;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.*;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.*;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.util.Vector;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.text.*;
-import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
+import net.minecraft.util.EnumHandSide;
+import net.minecraft.world.GameType;
 
-public class LBPlayer implements Player {
-	EntityPlayerMP mcPlayer;
+public class LBPlayer extends LBLivingEntityBase<EntityPlayerMP> implements Player {
+	PermissibleBase perm;
+	LBPlayerInventory inv;
 	
 	public LBPlayer(EntityPlayerMP player) {
-		mcPlayer = player;
-	}
-	
-	@Override
-	public String getName() {
-		return mcPlayer.getName();
+		super(player);
+		perm = new PermissibleBase(this);
+		inv = new LBPlayerInventory(player.inventory);
 	}
 
 	@Override
 	public PlayerInventory getInventory() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Inventory getEnderChest() {
-		// TODO Auto-generated method stub
-		return null;
+		return inv;
 	}
 
 	@Override
 	public MainHand getMainHand() {
+		return mcEntity.getPrimaryHand() == EnumHandSide.LEFT ? MainHand.LEFT : MainHand.RIGHT;
+	}
+
+	@Override
+	public ItemStack getItemInHand() {
+		return LBUtils.lbStack(mcEntity.inventory.getCurrentItem());
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public GameMode getGameMode() {
+		return GameMode.getByValue(mcEntity.interactionManager.getGameType().getID());
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public void setGameMode(GameMode mode) {
+		mcEntity.interactionManager.setGameType(GameType.getByID(mode.getValue()));
+	}
+
+	@Override
+	public Inventory getEnderChest() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -110,12 +116,6 @@ public class LBPlayer implements Player {
 	}
 
 	@Override
-	public ItemStack getItemInHand() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void setItemInHand(ItemStack item) {
 		// TODO Auto-generated method stub
 		
@@ -164,18 +164,6 @@ public class LBPlayer implements Player {
 	}
 
 	@Override
-	public GameMode getGameMode() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setGameMode(GameMode mode) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public boolean isBlocking() {
 		// TODO Auto-generated method stub
 		return false;
@@ -218,612 +206,21 @@ public class LBPlayer implements Player {
 	}
 
 	@Override
-	public double getEyeHeight() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getEyeHeight(boolean ignoreSneaking) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Location getEyeLocation() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Block> getLineOfSight(Set<Material> transparent, int maxDistance) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Block getTargetBlock(Set<Material> transparent, int maxDistance) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Block> getLastTwoTargetBlocks(Set<Material> transparent, int maxDistance) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getRemainingAir() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setRemainingAir(int ticks) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getMaximumAir() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setMaximumAir(int ticks) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getMaximumNoDamageTicks() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setMaximumNoDamageTicks(int ticks) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public double getLastDamage() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setLastDamage(double damage) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getNoDamageTicks() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setNoDamageTicks(int ticks) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Player getKiller() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean addPotionEffect(PotionEffect effect) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addPotionEffect(PotionEffect effect, boolean force) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addPotionEffects(Collection<PotionEffect> effects) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean hasPotionEffect(PotionEffectType type) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public PotionEffect getPotionEffect(PotionEffectType type) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void removePotionEffect(PotionEffectType type) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Collection<PotionEffect> getActivePotionEffects() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean hasLineOfSight(Entity other) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean getRemoveWhenFarAway() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setRemoveWhenFarAway(boolean remove) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public EntityEquipment getEquipment() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setCanPickupItems(boolean pickup) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean getCanPickupItems() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isLeashed() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Entity getLeashHolder() throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean setLeashHolder(Entity holder) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isGliding() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setGliding(boolean gliding) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setAI(boolean ai) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean hasAI() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setCollidable(boolean collidable) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isCollidable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public AttributeInstance getAttribute(Attribute attribute) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Location getLocation() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Location getLocation(Location loc) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setVelocity(Vector velocity) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Vector getVelocity() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public double getHeight() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getWidth() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public boolean isOnGround() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public World getWorld() {
-		return ((ILBWorldProvider)mcPlayer.getServerWorld()).getLBWorld();
-	}
-
-	@Override
-	public boolean teleport(Location location) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean teleport(Location location, TeleportCause cause) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean teleport(Entity destination) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean teleport(Entity destination, TeleportCause cause) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public List<Entity> getNearbyEntities(double x, double y, double z) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getEntityId() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getFireTicks() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getMaxFireTicks() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setFireTicks(int ticks) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void remove() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isDead() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Server getServer() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Entity getPassenger() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean setPassenger(Entity passenger) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public List<Entity> getPassengers() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean addPassenger(Entity passenger) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removePassenger(Entity passenger) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean eject() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public float getFallDistance() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setFallDistance(float distance) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setLastDamageCause(EntityDamageEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public EntityDamageEvent getLastDamageCause() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public UUID getUniqueId() {
-		return mcPlayer.getUniqueID();
-	}
-
-	@Override
-	public int getTicksLived() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setTicksLived(int value) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void playEffect(EntityEffect type) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public EntityType getType() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean isInsideVehicle() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean leaveVehicle() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Entity getVehicle() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setCustomNameVisible(boolean flag) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isCustomNameVisible() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setGlowing(boolean flag) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isGlowing() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setInvulnerable(boolean flag) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isInvulnerable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isSilent() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setSilent(boolean flag) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean hasGravity() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setGravity(boolean gravity) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getPortalCooldown() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setPortalCooldown(int cooldown) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Set<String> getScoreboardTags() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean addScoreboardTag(String tag) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removeScoreboardTag(String tag) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public PistonMoveReaction getPistonMoveReaction() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public List<MetadataValue> getMetadata(String metadataKey) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean hasMetadata(String metadataKey) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void removeMetadata(String metadataKey, Plugin owningPlugin) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void sendMessage(String message) {
-		mcPlayer.sendMessage(new TextComponentString(message));
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void sendMessage(String[] messages) {
-		for(String s : messages)
-			sendMessage(s);
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -905,72 +302,6 @@ public class LBPlayer implements Player {
 	}
 
 	@Override
-	public String getCustomName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setCustomName(String name) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void damage(double amount) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void damage(double amount, Entity source) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public double getHealth() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setHealth(double health) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public double getMaxHealth() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setMaxHealth(double health) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void resetMaxHealth() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public <T extends Projectile> T launchProjectile(Class<? extends T> projectile) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public <T extends Projectile> T launchProjectile(Class<? extends T> projectile, Vector velocity) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public boolean isConversing() {
 		// TODO Auto-generated method stub
 		return false;
@@ -1026,7 +357,8 @@ public class LBPlayer implements Player {
 
 	@Override
 	public Player getPlayer() {
-		return this;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -1817,5 +1149,5 @@ public class LBPlayer implements Player {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
+	

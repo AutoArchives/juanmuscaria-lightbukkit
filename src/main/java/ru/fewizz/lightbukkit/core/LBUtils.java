@@ -1,8 +1,10 @@
-package ru.fewizz.lightbukkit;
+package ru.fewizz.lightbukkit.core;
 
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.ItemStack;
 
+import net.minecraft.item.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -22,5 +24,16 @@ public class LBUtils {
 		}
 		
 		throw new Error("Undefined facing?!");
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static ItemStack lbStack(net.minecraft.item.ItemStack mcStack) {
+		//if(mcStack.getItem() instanceof ItemBlock)
+		return new ItemStack(Item.getIdFromItem(mcStack.getItem()), mcStack.getCount(), (short)mcStack.getItemDamage());
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static net.minecraft.item.ItemStack mcStack(ItemStack s) {
+		return new net.minecraft.item.ItemStack(Item.getItemById(s.getTypeId()), s.getAmount(), s.getDurability());
 	}
 }

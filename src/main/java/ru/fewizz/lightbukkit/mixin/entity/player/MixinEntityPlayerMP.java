@@ -5,8 +5,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import ru.fewizz.lightbukkit.LightBukkit;
-import ru.fewizz.lightbukkit.impl.LBPlayer;
+import ru.fewizz.lightbukkit.core.*;
 import ru.fewizz.lightbukkit.interfaces.IPlayer;
 
 @Mixin(EntityPlayerMP.class)

@@ -1,4 +1,4 @@
-package ru.fewizz.lightbukkit;
+package ru.fewizz.lightbukkit.core;
 
 import org.bukkit.event.block.Action;
 
@@ -6,7 +6,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import ru.fewizz.lightbukkit.impl.*;
 import ru.fewizz.lightbukkit.interfaces.*;
 
 public class LightBukkitEventHandler {
@@ -32,7 +31,7 @@ public class LightBukkitEventHandler {
 				new org.bukkit.event.player.PlayerInteractEvent(
 						player,
 						Action.LEFT_CLICK_BLOCK,
-						new LBItemStack(event.getItemStack()),
+						LBUtils.lbStack(event.getItemStack()),
 						world.getBlockAt(event.getPos()),
 						LBUtils.convertToBLockFace(event.getFace()));
 		

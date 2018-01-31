@@ -1,4 +1,4 @@
-package ru.fewizz.lightbukkit;
+package ru.fewizz.lightbukkit.core;
 
 import org.apache.logging.log4j.*;
 import org.bukkit.Bukkit;
@@ -8,7 +8,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.Mod.*;
 import net.minecraftforge.fml.common.event.*;
-import ru.fewizz.lightbukkit.impl.LBServer;
 
 @Mod(modid = LightBukkit.MODID, name = LightBukkit.NAME, version = "0")
 public class LightBukkit {

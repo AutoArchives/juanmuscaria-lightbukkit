@@ -1,4 +1,4 @@
-package ru.fewizz.lightbukkit.util;
+package ru.fewizz.lightbukkit.core.util;
 
 import org.bukkit.command.*;
 
@@ -21,7 +21,7 @@ public class MCBukkitCommand extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return bCommand.getUsage();
+		return bCommand.getUsage() + " - " + bCommand.getDescription();
 	}
 
 	@Override

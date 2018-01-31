@@ -5,6 +5,8 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
+    	"bukkit.MixinItemStack",
+    	"entity.MixinEntity",
     	"entity.player.MixinEntityPlayerMP",
     	"server.MixinMinecraftServer",
     	"world.MixinWorldServer",

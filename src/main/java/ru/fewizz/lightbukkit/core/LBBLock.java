@@ -1,4 +1,4 @@
-package ru.fewizz.lightbukkit.impl;
+package ru.fewizz.lightbukkit.core;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
-import ru.fewizz.lightbukkit.LightBukkit;
 import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
 
 public class LBBLock implements Block {
