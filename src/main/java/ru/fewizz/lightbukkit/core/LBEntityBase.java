@@ -4,15 +4,14 @@ import java.util.*;
 
 import org.bukkit.*;
 import org.bukkit.block.PistonMoveReaction;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.permissions.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
-import ru.fewizz.lightbukkit.interfaces.*;
+import ru.fewizz.lightbukkit.interfaces.ILBWorldProvider;
 
 public abstract class LBEntityBase<E extends net.minecraft.entity.Entity> implements Entity {
 	protected E mcEntity;
